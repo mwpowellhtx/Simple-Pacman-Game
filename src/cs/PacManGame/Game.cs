@@ -14,9 +14,14 @@ namespace PacManGame
         public Game(Board board)
         {
             _board = board;
+
             Pacman = new PacmanActor(new PacmanInput(), new Coordinate(1, 1));
+
             Pacman.Moved += Pacman_Moved;
-            Monster = new MonsterActor(new MonsterInput(), new Coordinate(8, 8));
+
+            Monster = new MonsterActor(new MonsterInput(),
+                // Assumes that the coordinate on the board is valid.
+                new Coordinate(board.Height - 2, board.Width - 2));
         }
 
         /// <summary>
@@ -81,21 +86,20 @@ namespace PacManGame
         {
             // Defer to the Monster(s) move(s).
             Monster.Move(_board);
-            return GameOver = Pacman.Position.Equals(Monster.Position);
+            var gameOver = GameOver = Pacman.Position.Equals(Monster.Position);
+            Pacman.Alive = !gameOver;
+            return gameOver;
         }
 
         public void Pacman_Moved(object sender, EventArgs e)
         {
             // This is a little more concise and easier to follow state machine.
-            if (TryTestPacmanPosition() || TryTestWon())
+            if (TryTestPacmanPosition() || TryTestWon() || !TryTestMonsterMoves())
             {
                 return;
             }
 
-            if (TryTestMonsterMoves())
-            {
-                Won = false;
-            }
+            Won = false;
         }
     }
 }
