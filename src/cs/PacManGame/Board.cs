@@ -12,20 +12,27 @@ namespace PacManGame
         {
             _map = new Dictionary<Coordinate, BoardStates>();
             ConvertToMap(
-                "##########",
+                "######1###",
                 "# *******#",
-                "#*##**##*#",
+                "2*##**##*#",
                 "#********#",
                 "#*#*##*#*#",
                 "#*#*##*#*#",
                 "#********#",
-                "#*##**##*#",
+                "#*##**##*2",
                 "#********#",
-                "##########");
+                "###1######");
         }
+
+        public int Height { get; private set; }
+
+        public int Width { get; private set; }
 
         private void ConvertToMap(params string[] mapStrings)
         {
+            Height = mapStrings.Length;
+            Width = mapStrings.Max(s => s.Length);
+
             // Instead of dealing with one line at a time, just accept all of them in sequence.
             for (var j = 0; j < mapStrings.Length; j++)
             {
@@ -38,6 +45,12 @@ namespace PacManGame
                     // ReSharper disable once SwitchStatementMissingSomeCases
                     switch (mapStrings[j][i])
                     {
+                        case '1':
+                            state = BoardStates.One;
+                            break;
+                        case '2':
+                            state = BoardStates.Two;
+                            break;
                         case '#':
                             state = BoardStates.Wall;
                             break;
@@ -53,7 +66,10 @@ namespace PacManGame
 
         public Board Eat(Coordinate position)
         {
-            _map[position] = BoardStates.Empty;
+            var state = _map[position];
+            // We only want to eat pill positions. Leave torsoidal positions alone.
+            if (state == BoardStates.Pill)
+                _map[position] = BoardStates.Empty;
             return this;
         }
 
@@ -62,20 +78,33 @@ namespace PacManGame
             return _map[position];
         }
 
+        public Coordinate FindTorsoidalDestination(Coordinate position)
+        {
+            var state = GetState(position);
+
+            if (!state.IsTorsoidal())
+            {
+                return null;
+            }
+
+            // Single or default will not work here because we're talking about structs "instances" (value), not class instances (reference).
+            var actual = _map.Where(m => m.Value == state && !m.Key.Equals(position)).ToArray();
+
+            if (actual.Any())
+            {
+                return (Coordinate) actual.Single().Key.Clone();
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Gets whether Pacman CanWin, but leaves the final decision up to the Game engine.
-        /// Winning simply means did not run into any Monsters, but this Game state is beyond the
-        /// scope of a Board. Instead we do know whether all of the non
-        /// <see cref="BoardStates.Wall"/> values are <see cref="BoardStates.Empty"/>.
+        /// Winning simply means there are no <see cref="BoardStates.Pill"/>s remaining.
         /// </summary>
         public bool CanWin
         {
-            get
-            {
-                return _map.Values
-                    .Where(v => v != BoardStates.Wall)
-                    .All(v => v == BoardStates.Empty);
-            }
+            get { return _map.Values.Count(v => v == BoardStates.Pill) == 0; }
         }
 
         public string Report(Game game)
@@ -113,6 +142,12 @@ namespace PacManGame
                             // ReSharper disable once SwitchStatementMissingSomeCases
                             switch (_map[k])
                             {
+                                case BoardStates.One:
+                                    g += "1";
+                                    break;
+                                case BoardStates.Two:
+                                    g += "2";
+                                    break;
                                 case BoardStates.Pill:
                                     g += "*";
                                     break;

@@ -20,19 +20,37 @@ namespace PacManGame
         {
             var result = (Coordinate) Clone();
 
+            Func<Coordinate> findTorsoidalDest = () => board.FindTorsoidalDestination(result);
+
             // ReSharper disable once SwitchStatementMissingSomeCases
             switch (choice)
             {
                 case MoveChoice.Left:
-                    result.X--;
+                    if (result.X == 0)
+                    {
+                        return findTorsoidalDest();
+                    }
+                     result.X--;
                     break;
                 case MoveChoice.Right:
+                    if (result.X == board.Width - 1)
+                    {
+                        return findTorsoidalDest();
+                    }
                     result.X++;
                     break;
                 case MoveChoice.Up:
+                    if (result.Y == 0)
+                    {
+                        return findTorsoidalDest();
+                    }
                     result.Y--;
                     break;
                 case MoveChoice.Down:
+                    if (result.Y == board.Width - 1)
+                    {
+                        return findTorsoidalDest();
+                    }
                     result.Y++;
                     break;
                 // ReSharper disable once RedundantEmptyDefaultSwitchBranch
