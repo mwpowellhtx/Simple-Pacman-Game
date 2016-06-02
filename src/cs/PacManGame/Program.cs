@@ -1,37 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace PacManGame
 {
+    // ReSharper disable once ArrangeTypeModifiers
     class Program
     {
+        // ReSharper disable once ArrangeTypeMemberModifiers
         static void Main(string[] args)
         {
-            Board board = new Board();
-            Game game = new Game(board);
-            Console.WriteLine(game.present());
-            while (!game.GameOver) {
-                string line = Console.ReadKey().KeyChar.ToString();
-                if (line.ToLower().Equals("w")) {
-                    game.Move(Game.move.UP);
-                }
-                else if (line.ToLower().Equals("a")) {
-                    game.Move(Game.move.LEFT);
-                }
-                else if (line.ToLower().Equals("s")) {
-                    game.Move(Game.move.DOWN);
-                }
-                else if (line.ToLower().Equals("d")) {
-                    game.Move(Game.move.RIGHT);
+            var game = new Game(new Board());
+            Console.WriteLine(game.Report());
+            // TODO: TBD: could defer this to a first class dependency injectable service
+            while (!game.GameOver)
+            {
+                var line = Console.ReadKey().KeyChar;
+                // ReSharper disable once SwitchStatementMissingSomeCases
+                switch (line.ToString().ToLower())
+                {
+                    case "w":
+                        game.Move(MoveChoice.Up);
+                        break;
+                    case "a":
+                        game.Move(MoveChoice.Left);
+                        break;
+                    case "s":
+                        game.Move(MoveChoice.Down);
+                        break;
+                    case "d":
+                        game.Move(MoveChoice.Right);
+                        break;
                 }
                 Console.WriteLine();
-                Console.WriteLine(game.present());
-                Thread.Sleep(4000);
+                Console.WriteLine(game.Report());
+                //Thread.Sleep(4000);
             }
         }
     }
-
 }

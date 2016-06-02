@@ -43,8 +43,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Actor.cs" />
+    <Compile Include="BoardStates.cs" />
+    <Compile Include="Coordinate.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Board.cs" />
     <Compile Include="Game.cs" />
+    <Compile Include="MonsterActor.cs" />
+    <Compile Include="MoveChoice.cs" />
+    <Compile Include="PacmanActor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

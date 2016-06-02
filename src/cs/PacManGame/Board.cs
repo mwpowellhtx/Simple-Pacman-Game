@@ -1,113 +1,129 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PacManGame
 {
-    class Board {
+    public class Board
+    {
+        private readonly IDictionary<Coordinate, BoardStates> _map;
 
-        private Dictionary<string, BoardStates> map;
-
-        public Board() {
-            map = new Dictionary<string, BoardStates>();
-            convertToMap("##########");
-            convertToMap("# *******#");
-            convertToMap("#*##**##*#");
-            convertToMap("#********#");
-            convertToMap("#*#*##*#*#");
-            convertToMap("#*#*##*#*#");
-            convertToMap("#********#");
-            convertToMap("#*##**##*#");
-            convertToMap("#********#");
-            convertToMap("##########");
+        public Board()
+        {
+            _map = new Dictionary<Coordinate, BoardStates>();
+            ConvertToMap(
+                "##########",
+                "# *******#",
+                "#*##**##*#",
+                "#********#",
+                "#*#*##*#*#",
+                "#*#*##*#*#",
+                "#********#",
+                "#*##**##*#",
+                "#********#",
+                "##########");
         }
 
-        private int lineCount = 0;
-        private void convertToMap(string pMapString) {
-            for (int i = 0; i < pMapString.Length; i++) {
-                Coordinate coordinate = new Coordinate(i, lineCount);
-                BoardStates state;
-                if(pMapString[i].Equals('#')) {
-                    state = BoardStates.WALL;
+        private void ConvertToMap(params string[] mapStrings)
+        {
+            // Instead of dealing with one line at a time, just accept all of them in sequence.
+            for (var j = 0; j < mapStrings.Length; j++)
+            {
+                for (var i = 0; i < mapStrings[j].Length; i++)
+                {
+                    var coordinate = new Coordinate(i, j);
+
+                    var state = BoardStates.Empty;
+
+                    // ReSharper disable once SwitchStatementMissingSomeCases
+                    switch (mapStrings[j][i])
+                    {
+                        case '#':
+                            state = BoardStates.Wall;
+                            break;
+                        case '*':
+                            state = BoardStates.Pill;
+                            break;
+                    }
+
+                    _map[coordinate] = state;
                 }
-                else if(pMapString[i].Equals('*')) {
-                    state = BoardStates.PILL;
-                }
-                else {
-                    state = BoardStates.EMPTY;
-                }
-                map.Add(coordinate.toString(),state);
+            }
+        }
+
+        public Board Eat(Coordinate position)
+        {
+            _map[position] = BoardStates.Empty;
+            return this;
+        }
+
+        public BoardStates GetState(Coordinate position)
+        {
+            return _map[position];
+        }
+
+        /// <summary>
+        /// Gets whether Pacman CanWin, but leaves the final decision up to the Game engine.
+        /// </summary>
+        public bool CanWin
+        {
+            get { return !_map.Values.Select(v => v == BoardStates.Pill).Any(); }
+        }
+
+        public string Report(Game game)
+        {
+            var pacman = game.Pacman;
+            var monster = game.Monster;
+
+            var sb = new StringBuilder();
+
+            // Order by rows then columns, and group by the rows.
+            var groupedKeys = _map.Keys
+                .OrderBy(k => k.Y)
+                .ThenBy(k => k.X)
+                .GroupBy(k => k.Y);
+
+            foreach (var group in groupedKeys)
+            {
+                var line = group.Aggregate(string.Empty,
+                    (g, k) =>
+                    {
+                        //P = Pac-Man
+                        //M = Monster
+                        //# = Wall
+                        //* = Pill
+                        if (k.Equals(pacman.Position))
+                        {
+                            g += pacman.Alive ? "P" : "X";
+                        }
+                        else if (k.Equals(monster.Position))
+                        {
+                            g += "M";
+                        }
+                        else
+                        {
+                            // ReSharper disable once SwitchStatementMissingSomeCases
+                            switch (_map[k])
+                            {
+                                case BoardStates.Pill:
+                                    g += "*";
+                                    break;
+                                case BoardStates.Wall:
+                                    g += "#";
+                                    break;
+                                case BoardStates.Empty:
+                                    g += " ";
+                                    break;
+                            }
+                        }
+
+                        return g;
+                    });
+
+                sb.AppendLine(line);
             }
 
-            lineCount++;
+            return sb.ToString();
         }
-
-        public string ToString(Coordinate pPacMan, Coordinate pMonster, bool pPacLives = true) {
-            string[] board = new string[10];
-            for (int i = 0; i < 10; i++) {
-                board[i] = "";
-            }
-
-            //P = Pac-Man
-            //M = Monster
-            //# = Wall
-            //* = Pill
-            foreach (KeyValuePair<string, BoardStates> boardStatese in map) {
-                string character = "";
-                if (!pPacLives) {
-                    character = "X";
-                }
-                else if(boardStatese.Key.Equals(pPacMan.toString())){
-                    character = "P";
-                }
-                else if (boardStatese.Key.Equals(pMonster.toString())) {
-                    character = "M";
-                } else if (boardStatese.Value == BoardStates.WALL) {
-                    character = "#";
-                } else if (boardStatese.Value == BoardStates.PILL) {
-                    character = "*";
-                } else {
-                    character = " ";
-                }
-
-
-               board[Convert.ToInt32(boardStatese.Key.Substring(2, 2))] = board[Convert.ToInt32(boardStatese.Key.Substring(2,2))].Insert(Convert.ToInt32(boardStatese.Key.Substring(0,2)), character);
-            }
-            StringBuilder test = new StringBuilder();
-            foreach (string s in board) {
-                test.AppendLine(s);
-            }
-            return test.ToString();
-        }
-
-        public BoardStates GetState(Coordinate pNewPosition) {
-            return map[pNewPosition.toString()];
-        }
-        
-        public void Eat(Coordinate pNewPosition) {
-            map[pNewPosition.toString()] = BoardStates.EMPTY;
-        }
-    }
-
-    public enum BoardStates {
-        WALL,
-        PILL,
-        EMPTY
-    }
-
-
-    public class Coordinate  {
-        public int x;
-        public int y;
-
-        public Coordinate(int pX, int pY) {
-            x = pX;
-            y = pY;
-        }
-
-        public new string toString() {
-            return string.Format("{0}{1}", x.ToString("D2"), y.ToString("D2"));
-        }
-
     }
 }

@@ -1,113 +1,86 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace PacManGame
 {
-    class Game
+    public class Game
     {
-        private Board mBoard;
-        private Coordinate mPacMansPosition;
-        private Coordinate mMonsterPosition;
-        private bool mGameOver;
-        private bool mWon;
+        private readonly Board _board;
 
-        public Game(Board pBoard) {
-            mBoard = pBoard;
-            mPacMansPosition = new Coordinate(1, 1);
-            mMonsterPosition = new Coordinate(8,8);
-        }
+        public PacmanActor Pacman { get; private set; }
 
-        public enum move {
-            LEFT,
-            RIGHT,
-            UP,
-            DOWN
-        }
+        public MonsterActor Monster { get; private set; }
 
-        public void Move (move pMove) {
-            //legal move
-            Coordinate newPosition;
-            switch (pMove)
-            {
-                case move.LEFT:
-                    newPosition = new Coordinate(mPacMansPosition.x - 1, mPacMansPosition.y);
-                    break;
-                case move.RIGHT:
-                    newPosition = new Coordinate(mPacMansPosition.x + 1, mPacMansPosition.y);
-                    break;
-                case move.UP:
-                    newPosition = new Coordinate(mPacMansPosition.x, mPacMansPosition.y - 1);
-                    break;
-                default:
-                    newPosition = new Coordinate(mPacMansPosition.x, mPacMansPosition.y + 1);
-                    break;
-            }
-            if (mBoard.GetState(newPosition) == BoardStates.WALL)
-            {
-                // dont move him
-            }
-            else
-            {
-                mPacMansPosition = newPosition;
-                mBoard.Eat(newPosition);
-            }
-
-            if (mPacMansPosition.toString().Equals(mMonsterPosition.toString()))
-            {
-                mGameOver = true;
-                mWon = false;
-            }
-            MoveMonster();
-            if (mPacMansPosition.toString().Equals(mMonsterPosition.toString())) {
-                mGameOver = true;
-                mWon = false;
-            }
-
-            //win/loose
-        }
-
-        private void MoveMonster() {
-            Coordinate newMonsterPosition;
-            Array values = Enum.GetValues(typeof (move));
-            Random random = new Random();
-            move monsterMove = (move) values.GetValue(random.Next(values.Length));
-            switch (monsterMove) {
-                case move.LEFT:
-                    newMonsterPosition = new Coordinate(mMonsterPosition.x - 1, mMonsterPosition.y);
-                    break;
-                case move.RIGHT:
-                    newMonsterPosition = new Coordinate(mMonsterPosition.x + 1, mMonsterPosition.y);
-                    break;
-                case move.UP:
-                    newMonsterPosition = new Coordinate(mMonsterPosition.x, mMonsterPosition.y - 1);
-                    break;
-                default:
-                    newMonsterPosition = new Coordinate(mMonsterPosition.x, mMonsterPosition.y + 1);
-                    break;
-            }
-            if (mBoard.GetState(newMonsterPosition) == BoardStates.WALL) {
-                MoveMonster();
-            }
-            else {
-                mMonsterPosition = newMonsterPosition;
-            }
-        }
-
-        public string present() {
-            if (mGameOver) {
-                if (mWon) {
-                return mBoard.ToString(mPacMansPosition, mMonsterPosition)+"GAME OVER YOU WON";
-                }
-                return mBoard.ToString(mPacMansPosition, mMonsterPosition,false) + "GAME OVER YOU LOST!!!!1!";
-            }
-            return mBoard.ToString(mPacMansPosition, mMonsterPosition);
-        }
-
-        internal bool GameOver
+        public Game(Board board)
         {
-            get { return mGameOver; }
+            _board = board;
+            Pacman = new PacmanActor(new Coordinate(1, 1));
+            Pacman.Moved += Pacman_Moved;
+            Monster = new MonsterActor(new Coordinate(8, 8));
+        }
+
+        public Game Move(MoveChoice choice)
+        {
+            Pacman.Move(_board, choice);
+            return this;
+        }
+
+        public string Report()
+        {
+            var sb = new StringBuilder();
+
+            var message = string.Empty;
+
+            if (GameOver)
+            {
+                message = Won ? "GAME OVER YOU WON" : "GAME OVER YOU LOST!";
+            }
+
+            sb.Append(_board.Report(this));
+
+            if (!string.IsNullOrEmpty(message))
+            {
+                sb.AppendLine(message);
+            }
+
+            return sb.ToString();
+        }
+
+        internal bool GameOver { get; private set; }
+
+        private bool? _won;
+
+        private bool Won
+        {
+            get
+            {
+                if (_board.CanWin)
+                {
+                    _won = true;
+                }
+                return _won ?? false;
+            }
+            set { _won = value; }
+        }
+
+        public void Pacman_Moved(object sender, EventArgs e)
+        {
+            if (Pacman.Position.Equals(Monster.Position))
+            {
+                GameOver = true;
+                Won = false;
+            }
+
+            if (GameOver) return;
+
+            Monster.Move(_board);
+
+            // ReSharper disable once InvertIf
+            if (Pacman.Position.Equals(Monster.Position))
+            {
+                GameOver = true;
+                Won = false;
+            }
         }
     }
 }
