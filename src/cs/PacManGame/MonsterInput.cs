@@ -2,10 +2,16 @@ using System.Linq;
 
 namespace PacManGame
 {
+    /// <summary>
+    /// Represents a basic randomly generated movement algorithm. The monsters will not be very
+    /// smart, in fact they will be quite dumb, as a result.
+    /// </summary>
     public class MonsterInput : Input
     {
-        public override MoveChoice? Next(Board board, Actor actor)
+        public override MoveChoice? Next(Game game, Actor actor)
         {
+            var board = game.Board;
+
             // Help restrict the values we want. Otherwise the monster logic will be indecisive.
             var exceptValues = EnumHelper<MoveChoice>.GetValues()
                 .Where(c =>

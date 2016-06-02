@@ -10,9 +10,11 @@ namespace PacManGame
         {
         }
 
-        public override Actor Move(Board board)
+        public override Actor Move(Game game)
         {
-            var choice = Input.Next(board, this);
+            var board = game.Board;
+
+            var choice = Input.Next(game, this);
 
             // God help you if you ran into a wall. Do nothing in that instance.
             var position = Position.Apply(board, choice);

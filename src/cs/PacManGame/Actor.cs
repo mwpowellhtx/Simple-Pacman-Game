@@ -22,7 +22,7 @@ namespace PacManGame
 
         public Coordinate Position { get; protected set; }
 
-        public abstract Actor Move(Board board);
+        public abstract Actor Move(Game game);
 
         protected Actor(IInput input, Coordinate position)
         {

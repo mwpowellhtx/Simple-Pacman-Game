@@ -7,7 +7,7 @@ namespace PacManGame
 {
     public class Game
     {
-        private readonly Board _board;
+        public Board Board { get; private set; }
 
         public PacmanActor Pacman { get; private set; }
 
@@ -23,7 +23,7 @@ namespace PacManGame
 
         public Game(Board board)
         {
-            _board = board;
+            Board = board;
 
             var startingMonsterCoord = new Lazy<Coordinate>(() => GetStartingMonsterCoord(board));
 
@@ -47,7 +47,7 @@ namespace PacManGame
         /// <returns></returns>
         public Game Next()
         {
-            Pacman.Move(_board);
+            Pacman.Move(this);
             return this;
         }
 
@@ -62,7 +62,7 @@ namespace PacManGame
                 message = Won ? "GAME OVER YOU WON" : "GAME OVER YOU LOST!";
             }
 
-            sb.Append(_board.Report(this));
+            sb.Append(Board.Report(this));
 
             if (!string.IsNullOrEmpty(message))
             {
@@ -80,7 +80,7 @@ namespace PacManGame
         {
             get
             {
-                if (_board.CanWin)
+                if (Board.CanWin)
                 {
                     _won = true;
                 }
@@ -102,7 +102,7 @@ namespace PacManGame
         private bool TryTestMonsterMoves()
         {
             // Defer to the Monster(s) move(s).
-            Monsters.ToList().ForEach(m => m.Move(_board));
+            Monsters.ToList().ForEach(m => m.Move(this));
             var gameOver = GameOver = Monsters.Any(m => Pacman.Position.Equals(m.Position));
             Pacman.Alive = !gameOver;
             return gameOver;
