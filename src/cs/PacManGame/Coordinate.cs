@@ -87,5 +87,10 @@ namespace PacManGame
         {
             return string.Format("{{{0}, {1}}}", X, Y);
         }
+
+        public static Coordinate operator -(Coordinate a, Coordinate b)
+        {
+            return new Coordinate(a.X - b.X, a.Y - b.Y);
+        }
     }
 }

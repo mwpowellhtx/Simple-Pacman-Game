@@ -53,16 +53,28 @@ namespace PacManGame
             }
         }
 
-        public static T ElementAtRandom(IEnumerable<T> except = null)
+        public static IEnumerable<T> GetPossibleValues(params T[] except)
         {
             // TODO: TBD: I'm sure a better flow field could be established to help govern Monster behavior than "random"
             var helper = (EnumHelper<T>) EnumHelper.Helpers[typeof(T)];
-            except = (except ?? new T[0]).ToArray();
-            var values = helper._values.Except(except).ToArray();
+            return helper._values.Except(except).ToArray();
+        }
+    }
+
+    public static class EnumerableExtensionMethods
+    {
+        private static readonly Random Rnd = new Random((int) (DateTime.UtcNow.Ticks%int.MaxValue));
+
+        public static T ElementAtRandom<T>(this IEnumerable<T> values)
+        {
             /* Helps with our distribution of possible answers, which also
              * encourages the monster out of any corners he may run into. */
-            var i = helper._rand.Next() % values.Length;
-            return values[i];
+
+            // ReSharper disable once PossibleMultipleEnumeration
+            var i = Rnd.Next()%values.Count();
+
+            // ReSharper disable once PossibleMultipleEnumeration
+            return values.ElementAt(i);
         }
     }
 }

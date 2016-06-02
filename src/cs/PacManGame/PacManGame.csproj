@@ -43,7 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DistanceBasedMonsterInput.cs" />
+    <Compile Include="BestPathMonsterInput.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="Actor.cs" />
     <Compile Include="BoardStates.cs" />

@@ -37,7 +37,7 @@ namespace PacManGame
             {
                 new MonsterActor(new MonsterInput(), (Coordinate) startingMonsterCoord.Value.Clone()),
                 new MonsterActor(new MonsterInput(), (Coordinate) startingMonsterCoord.Value.Clone()),
-                new MonsterActor(new MonsterInput(), (Coordinate) startingMonsterCoord.Value.Clone())
+                new MonsterActor(new BestPathMonsterInput(), (Coordinate) startingMonsterCoord.Value.Clone())
             };
         }
 
