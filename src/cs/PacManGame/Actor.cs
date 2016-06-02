@@ -18,13 +18,16 @@ namespace PacManGame
             Moved(this, e);
         }
 
+        protected IInput Input { get; private set; }
+
         public Coordinate Position { get; protected set; }
 
-        public abstract Actor Move(Board board, MoveChoice? choice = null);
+        public abstract Actor Move(Board board);
 
-        protected Actor(Coordinate position)
+        protected Actor(IInput input, Coordinate position)
         {
             Alive = true;
+            Input = input;
             Position = position;
         }
     }

@@ -4,13 +4,16 @@ namespace PacManGame
 {
     public class PacmanActor : Actor
     {
-        public PacmanActor(Coordinate position)
-            : base(position)
+        // ReSharper disable once SuggestBaseTypeForParameter
+        public PacmanActor(PacmanInput input, Coordinate position)
+            : base(input, position)
         {
         }
 
-        public override Actor Move(Board board, MoveChoice? choice = null)
+        public override Actor Move(Board board)
         {
+            var choice = Input.Next(board, this);
+
             // God help you if you ran into a wall. Do nothing in that instance.
             var position = Position.Apply(board, choice);
 

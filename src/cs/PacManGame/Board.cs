@@ -64,10 +64,18 @@ namespace PacManGame
 
         /// <summary>
         /// Gets whether Pacman CanWin, but leaves the final decision up to the Game engine.
+        /// Winning simply means did not run into any Monsters, but this Game state is beyond the
+        /// scope of a Board. Instead we do know whether all of the non
+        /// <see cref="BoardStates.Wall"/> values are <see cref="BoardStates.Empty"/>.
         /// </summary>
         public bool CanWin
         {
-            get { return !_map.Values.Select(v => v == BoardStates.Pill).Any(); }
+            get
+            {
+                return _map.Values
+                    .Where(v => v != BoardStates.Wall)
+                    .All(v => v == BoardStates.Empty);
+            }
         }
 
         public string Report(Game game)

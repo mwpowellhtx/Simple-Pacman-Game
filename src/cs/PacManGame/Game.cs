@@ -14,14 +14,18 @@ namespace PacManGame
         public Game(Board board)
         {
             _board = board;
-            Pacman = new PacmanActor(new Coordinate(1, 1));
+            Pacman = new PacmanActor(new PacmanInput(), new Coordinate(1, 1));
             Pacman.Moved += Pacman_Moved;
-            Monster = new MonsterActor(new Coordinate(8, 8));
+            Monster = new MonsterActor(new MonsterInput(), new Coordinate(8, 8));
         }
 
-        public Game Move(MoveChoice choice)
+        /// <summary>
+        /// Next as in the next potential state of the Game.
+        /// </summary>
+        /// <returns></returns>
+        public Game Next()
         {
-            Pacman.Move(_board, choice);
+            Pacman.Move(_board);
             return this;
         }
 
@@ -63,22 +67,33 @@ namespace PacManGame
             set { _won = value; }
         }
 
+        private bool TryTestPacmanPosition()
+        {
+            return GameOver = Pacman.Position.Equals(Monster.Position);
+        }
+
+        private bool TryTestWon()
+        {
+            return GameOver = Won;
+        }
+
+        private bool TryTestMonsterMoves()
+        {
+            // Defer to the Monster(s) move(s).
+            Monster.Move(_board);
+            return GameOver = Pacman.Position.Equals(Monster.Position);
+        }
+
         public void Pacman_Moved(object sender, EventArgs e)
         {
-            if (Pacman.Position.Equals(Monster.Position))
+            // This is a little more concise and easier to follow state machine.
+            if (TryTestPacmanPosition() || TryTestWon())
             {
-                GameOver = true;
-                Won = false;
+                return;
             }
 
-            if (GameOver) return;
-
-            Monster.Move(_board);
-
-            // ReSharper disable once InvertIf
-            if (Pacman.Position.Equals(Monster.Position))
+            if (TryTestMonsterMoves())
             {
-                GameOver = true;
                 Won = false;
             }
         }
