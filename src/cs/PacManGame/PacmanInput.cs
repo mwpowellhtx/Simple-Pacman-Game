@@ -6,7 +6,7 @@ namespace PacManGame
     {
         public override MoveChoice? Next(Board board, Actor actor)
         {
-            var line = Console.ReadKey().KeyChar;
+            var line = Console.ReadKey(true).KeyChar;
             // ReSharper disable once SwitchStatementMissingSomeCases
             switch (line.ToString().ToLower())
             {

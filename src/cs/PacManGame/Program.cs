@@ -6,18 +6,19 @@ namespace PacManGame
     class Program
     {
         // ReSharper disable once ArrangeTypeMemberModifiers
-        static void Main(string[] args)
+        static void Main()
         {
             var game = new Game(new Board());
-            Console.WriteLine(game.Report());
-            while (!game.GameOver)
+            do
             {
-                game.Next();
-                Console.WriteLine();
+                // Report on the game and advance while not game over.
                 Console.WriteLine(game.Report());
-            }
+                game.Next();
+            } while (!game.GameOver);
+            // Write the final game report.
+            Console.WriteLine(game.Report());
             Console.Write("Press any key to continue");
-            Console.ReadKey();
+            Console.ReadKey(true);
         }
     }
 }

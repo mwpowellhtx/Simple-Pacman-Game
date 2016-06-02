@@ -11,6 +11,7 @@ namespace PacManGame
                 .Where(c =>
                 {
                     var state = board.GetState(actor.Position.Apply(board, c));
+                    // This part should be consistent regardless whether talking about a torsoidal or normal movement.
                     return state == BoardStates.Wall;
                 }).ToArray();
 
