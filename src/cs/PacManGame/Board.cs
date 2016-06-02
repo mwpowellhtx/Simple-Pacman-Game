@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -8,20 +9,10 @@ namespace PacManGame
     {
         private readonly IDictionary<Coordinate, BoardStates> _map;
 
-        public Board()
+        public Board(Func<IEnumerable<string>> getStrings)
         {
             _map = new Dictionary<Coordinate, BoardStates>();
-            ConvertToMap(
-                "######1###",
-                "# *******#",
-                "2*##**##*#",
-                "#********#",
-                "#*#*##*#*#",
-                "#*#*##*#*#",
-                "#********#",
-                "#*##**##*2",
-                "#********#",
-                "###1######");
+            ConvertToMap(getStrings().ToArray());
         }
 
         public int Height { get; private set; }
