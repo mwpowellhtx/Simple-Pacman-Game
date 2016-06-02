@@ -101,7 +101,7 @@ namespace PacManGame
         public string Report(Game game)
         {
             var pacman = game.Pacman;
-            var monster = game.Monster;
+            var monsters = game.Monsters;
 
             var sb = new StringBuilder();
 
@@ -124,7 +124,7 @@ namespace PacManGame
                         {
                             g += pacman.Alive ? "P" : "X";
                         }
-                        else if (k.Equals(monster.Position))
+                        else if (monsters.Any(m => k.Equals(m.Position)))
                         {
                             g += "M";
                         }

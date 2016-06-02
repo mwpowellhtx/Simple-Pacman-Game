@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PacManGame
@@ -9,19 +11,34 @@ namespace PacManGame
 
         public PacmanActor Pacman { get; private set; }
 
-        public MonsterActor Monster { get; private set; }
+        public IEnumerable<MonsterActor> Monsters { get; private set; }
+
+        private readonly Lazy<Coordinate> _startingPacmanCoord
+            = new Lazy<Coordinate>(() => new Coordinate(1, 1));
+
+        private static Coordinate GetStartingMonsterCoord(Board board)
+        {
+            return new Coordinate(board.Height - 2, board.Width - 2);
+        }
 
         public Game(Board board)
         {
             _board = board;
 
-            Pacman = new PacmanActor(new PacmanInput(), new Coordinate(1, 1));
+            var startingMonsterCoord = new Lazy<Coordinate>(() => GetStartingMonsterCoord(board));
+
+            Pacman = new PacmanActor(new PacmanInput(),
+                (Coordinate) _startingPacmanCoord.Value.Clone());
 
             Pacman.Moved += Pacman_Moved;
 
-            Monster = new MonsterActor(new MonsterInput(),
-                // Assumes that the coordinate on the board is valid.
-                new Coordinate(board.Height - 2, board.Width - 2));
+            // Assumes that the coordinate on the board is valid.
+            Monsters = new[]
+            {
+                new MonsterActor(new MonsterInput(), (Coordinate) startingMonsterCoord.Value.Clone()),
+                new MonsterActor(new MonsterInput(), (Coordinate) startingMonsterCoord.Value.Clone()),
+                new MonsterActor(new MonsterInput(), (Coordinate) startingMonsterCoord.Value.Clone())
+            };
         }
 
         /// <summary>
@@ -74,7 +91,7 @@ namespace PacManGame
 
         private bool TryTestPacmanPosition()
         {
-            return GameOver = Pacman.Position.Equals(Monster.Position);
+            return GameOver = Monsters.Any(m => Pacman.Position.Equals(m.Position));
         }
 
         private bool TryTestWon()
@@ -85,8 +102,8 @@ namespace PacManGame
         private bool TryTestMonsterMoves()
         {
             // Defer to the Monster(s) move(s).
-            Monster.Move(_board);
-            var gameOver = GameOver = Pacman.Position.Equals(Monster.Position);
+            Monsters.ToList().ForEach(m => m.Move(_board));
+            var gameOver = GameOver = Monsters.Any(m => Pacman.Position.Equals(m.Position));
             Pacman.Alive = !gameOver;
             return gameOver;
         }
