@@ -157,7 +157,7 @@ namespace pacman {
         std::string message;
 
         if (is_game_over()) {
-            message = is_won() ? "GAME OVER YOU WON" : "GAME OVER YOU LOST!";
+            message = is_won() ? "GAME OVER YOU WON!" : "GAME OVER YOU LOST";
         }
 
         get_board().report(os);

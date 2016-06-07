@@ -2,7 +2,6 @@
 #define _ACTOR_BASE_HPP_
 
 #include "positioned.h"
-#include "input_base.h"
 
 #include <functional>
 #include <vector>
@@ -11,13 +10,18 @@ namespace pacman {
 
     template<
         class Derived
+            , class Input
     >
     class actor_base
         : public positioned {
     public:
 
-        typedef input_base input_type;
+        typedef Input input_type;
         typedef Derived derived_type;
+
+    private:
+
+        input_type _input;
 
     public:
 
@@ -30,6 +34,7 @@ namespace pacman {
 
         actor_base(coordinates const & p)
             : positioned(p)
+            , _input()
             , _moving()
             , alive(true) {
         }
@@ -44,7 +49,9 @@ namespace pacman {
             _moving.push_back(callback);
         }
 
-        virtual input_type & get_input() = 0;
+        virtual Input & get_input() {
+            return _input;
+        }
 
         virtual void moving() {
             for (auto & callback : _moving) {
