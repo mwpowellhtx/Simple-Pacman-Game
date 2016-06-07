@@ -26,6 +26,15 @@ namespace linq {
         }
         return false;
     }
+
+    template<typename R, typename T>
+    std::vector<R> project(std::vector<T> const & values, std::function<R(T const &)> const & proj) {
+        std::vector<R> results;
+        for (const auto & value : values) {
+            results.push_back(proj(value));
+        }
+        return results;
+    }
 }
 
 #endif //_LINQ_HPP_

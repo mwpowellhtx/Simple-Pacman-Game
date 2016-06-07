@@ -10,7 +10,9 @@ namespace pacman {
         : public actor_base<monster_actor, monster_input> {
     public:
 
-        monster_actor(coordinates const & p);
+        char _name;
+
+        monster_actor(coordinates const & p, const char & name);
 
         monster_actor(monster_actor const & other);
     };

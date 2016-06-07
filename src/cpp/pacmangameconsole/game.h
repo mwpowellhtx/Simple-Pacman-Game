@@ -31,6 +31,7 @@ namespace pacman {
         std::vector<monster_actor> get_monsters();
 
         move_choice monster_input_callback(positioned const & p);
+        move_choice best_path_monster_input_callback(positioned const & p);
 
         game & next();
 

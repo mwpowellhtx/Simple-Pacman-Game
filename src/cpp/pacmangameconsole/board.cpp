@@ -61,7 +61,8 @@ namespace pacman {
 
         const auto state = b.get_state(coords);
 
-        if (is_torsoidal(state)) {
+        // TODO: TBD: possible corner case? probably NOT where we want pacman to land...
+        if (!is_torsoidal(state)) {
             return coordinates();
         }
 
@@ -69,7 +70,7 @@ namespace pacman {
 
         std::vector<std::pair<coordinates, board_state>> placeholder;
 
-        std::copy_if(states.cbegin(), states.cend(), placeholder.begin(),
+        std::copy_if(states.cbegin(), states.cend(), std::back_inserter(placeholder),
             [&coords, &state](std::pair<coordinates, board_state> const & s) {
             return s.second == state && !is_equal(s.first, coords);
         });

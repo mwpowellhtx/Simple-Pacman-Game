@@ -85,6 +85,7 @@
     <ClInclude Include="equatable.hpp" />
     <ClInclude Include="game.h" />
     <ClInclude Include="input_base.h" />
+    <ClInclude Include="input_path.h" />
     <ClInclude Include="linq.hpp" />
     <ClInclude Include="monster_actor.h" />
     <ClInclude Include="monster_input.h" />
@@ -98,6 +99,7 @@
     <ClCompile Include="enums.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="input_base.cpp" />
+    <ClCompile Include="input_path.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="monster_actor.cpp" />
     <ClCompile Include="monster_input.cpp" />
