@@ -12,6 +12,13 @@ namespace PacManGame
     /// </summary>
     public class BestPathMonsterInput : MonsterInput
     {
+        private readonly IEnumerable<MoveChoice> _availableChoices;
+
+        public BestPathMonsterInput()
+        {
+            _availableChoices = EnumHelper<MoveChoice>.GetPossibleValues().ToArray();
+        }
+
         private class InputPath : ICloneable
         {
             public Coordinate Current { get; private set; }
@@ -61,7 +68,7 @@ namespace PacManGame
         /// <returns></returns>
         /// <remarks>Recursion might not be the best choice for performance reasons, but it will
         /// most certainly get the job done.</remarks>
-        private static IEnumerable<InputPath> GetBestInputPaths(Game game, IList<InputPath> paths)
+        private IEnumerable<InputPath> GetBestInputPaths(Game game, IList<InputPath> paths)
         {
             /* The recursive terminal use case. Careful, though, we could end up with
              * tens of thousands of paths, hundreds of which are potential candidates. */
@@ -82,26 +89,25 @@ namespace PacManGame
             {
                 var p = path;
 
-                var staged = EnumHelper<MoveChoice>.GetPossibleValues()
-                    .Select(c =>
+                var staged = _availableChoices.Select(c =>
+                {
+                    var applied = p.Current.Apply(board, c);
+
+                    // Allow valid choices and where we have not yet been.
+                    if (invalidStates.Contains(board.GetState(applied))
+                        || p.Visitations.ContainsKey(applied))
                     {
-                        var applied = p.Current.Apply(board, c);
+                        return null;
+                    }
 
-                        // Allow valid choices and where we have not yet been.
-                        if (invalidStates.Contains(board.GetState(applied))
-                            || p.Visitations.ContainsKey(applied))
-                        {
-                            return null;
-                        }
+                    // Not a clone but rather the next, using Applied for Current.
+                    var next = new InputPath(applied, p.Destination, p.History, p.Visitations);
 
-                        // Not a clone but rather the next, using Applied for Current.
-                        var next = new InputPath(applied, p.Destination, p.History, p.Visitations);
+                    next.History.Add(c);
+                    next.Visitations[applied] = c;
 
-                        next.History.Add(c);
-                        next.Visitations[applied] = c;
-
-                        return next;
-                    }).Where(x => x != null).ToArray();
+                    return next;
+                }).Where(x => x != null).ToArray();
 
                 if (staged.Any())
                 {
