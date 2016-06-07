@@ -2,5 +2,9 @@ bin/
 obj/
 _ReSharper.Caches/
 
-*.suo
+Debug/
+Release/
 
+*.suo
+*.*sdf
+*.user
