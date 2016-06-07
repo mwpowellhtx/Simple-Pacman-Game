@@ -89,25 +89,29 @@ namespace PacManGame
             {
                 var p = path;
 
-                var staged = _availableChoices.Select(c =>
-                {
-                    var applied = p.Current.Apply(board, c);
-
-                    // Allow valid choices and where we have not yet been.
-                    if (invalidStates.Contains(board.GetState(applied))
-                        || p.Visitations.ContainsKey(applied))
+                // Decomposed the prior select into a couple of incremental decisions.
+                var staged = _availableChoices
+                    .Select(c =>
                     {
-                        return null;
-                    }
-
-                    // Not a clone but rather the next, using Applied for Current.
-                    var next = new InputPath(applied, p.Destination, p.History, p.Visitations);
-
-                    next.History.Add(c);
-                    next.Visitations[applied] = c;
-
-                    return next;
-                }).Where(x => x != null).ToArray();
+                        // We will use the coordinates, choice, and state throughout.
+                        var applied = p.Current.Apply(board, c);
+                        return new {Applied = applied, Choice = c, State = board.GetState(applied)};
+                    })
+                    .Where(anon =>
+                        // Allow valid choices and where we have not yet been.
+                        !(invalidStates.Contains(anon.State)
+                          || p.Visitations.ContainsKey(anon.Applied))
+                    )
+                    .Select(anon =>
+                    {
+                        var a = anon.Applied;
+                        var c = anon.Choice;
+                        // Not a clone but rather the next, using Applied for Current.
+                        var result = new InputPath(a, p.Destination, p.History, p.Visitations);
+                        result.History.Add(c);
+                        result.Visitations[a] = c;
+                        return result;
+                    }).ToArray();
 
                 if (staged.Any())
                 {
